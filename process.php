@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Main processing file for EasyWorship 6.1 Exporter
+ *
+ * @package    EasyWorship 6.1 Exporter
+ * @license    http://www.opensource.org/licenses/mit-license.html  MIT License
+ * @author     James Inglis <hello@jamesinglis.no>
+ * @version    0.1
+ * @link       https://github.com/jamesinglis/ew61-export
+ */
+
 require 'config.php';
 require 'functions.php';
 

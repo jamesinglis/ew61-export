@@ -1,11 +1,24 @@
 <?php
 
+/**
+ * Processing functions for EasyWorship 6.1 Exporter
+ *
+ * @package    EasyWorship 6.1 Exporter
+ * @license    http://www.opensource.org/licenses/mit-license.html  MIT License
+ * @author     James Inglis <hello@jamesinglis.no>
+ * @version    0.1
+ * @link       https://github.com/jamesinglis/ew61-export
+ */
+
+
+// Set the file encoding for everything to UTF-8
 mb_detect_order(array('UTF-8', 'ISO-8859-1', 'ASCII'));
 ini_set('default_charset', 'utf-8');
 mb_internal_encoding('UTF-8');
 mb_http_output('UTF-8');
 mb_http_input('UTF-8');
 mb_regex_encoding('UTF-8');
+
 
 /**
  * Formats the title of the song
