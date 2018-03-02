@@ -27,9 +27,8 @@ $custom_settings = array(
     'prop6_add_hotkeys' => true, // Adds a blank "End" slide to ProPresenter files
 );
 
+$reflow_max_lines = 2; // How many lines should we try to 'reflow' the text to?
 $file_export_type = 'plain_text'; // set to 'propresenter6' to use the experimental ProPresenter6 output
 
-// ProPresenter6 export settings
-$reflow_max_lines = 2;
 $song_section_names = array('Verse', 'Chorus', 'Pre-Chorus', 'Bridge', 'Tag', 'Intro');
 $words_to_capitalize = array('Jesus', 'God', 'Gud', 'Lord', 'You', 'Your', 'Du', 'Din', 'Ditt', 'Han', 'Hans', 'Ham', 'Holy Spirit', 'Father');
