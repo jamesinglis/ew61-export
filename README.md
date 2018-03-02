@@ -30,6 +30,7 @@ For further information about these, the following links may be useful:
 
 To use this solution, you'll need to be comfortable with running PHP scripts. It doesn't have a graphical user interface, however you can run this from the command line or from a web browser.
 
+* Ensure that PHP has PDO SQLite support/
 * Clone this repository to a location on your computer that PHP has write access to.
 * Locate the EasyWorship database files in the EasyWorship data directory
     * This is commonly in C:\Users\Public\Softouch\EasyWorship\Default\Databases\Data\ but may vary
@@ -38,6 +39,7 @@ To use this solution, you'll need to be comfortable with running PHP scripts. It
     * Songs.db
     * SongWords.db
 * Review the custom formatting options in config.php and set the values to true or false
+* The default settings will export your songs in plain text files. If you want to use the experimental ProPresenter6 export feature, change `$file_export_type = 'plain_text';` to `$file_export_type = 'propresenter6';` in config.php.
 * From the command line, change directory to the repository root and run:
     * php ./process.php
 * Alternatively, if the repository in a directory served by a web server, you may run process.php in a web browser.
@@ -49,12 +51,14 @@ Note: this script does not write anything to the EasyWorship database files, how
 
 ## Features
 
-* Exports all songs and lyrics from EasyWorship 6.1 database files
+* Exports all songs and lyrics from EasyWorship 6.1 database files into a date-labeled sub-directory in /output directory
 * Attempts to strip all formatting from song words to make for a clean import
 * Attempts to handle inconsistencies with text encoding
+* Reflow song sections over 2 lines long (can be changed in config file)
 * Custom formatting functions (needs to be enabled in config file)
     * 'capitalize_names' - Capitalize some property names
     * 'remove_end_punctuation' - Remove line-ending punctuation
+    * 'fix_mid_line_punctuation' - Fixes mid-line punctuation - replaces '.' with a line break, and makes sure ',;\?!' is always followed by a space
     * 'straighten_curly_quotes' - Straighten curly quotes
     * 'remove_x2' - Remove 'x2' type references and empty parentheses
     * 'start_with_capital' - Begin all lines with capital letter
@@ -63,6 +67,12 @@ Note: this script does not write anything to the EasyWorship database files, how
     * 'prevent_overwrites' - Prevent overwriting files - adds a '(1)' style suffix
     * 'add_metadata_to_export_files' - Adds the metadata block to the top of the export files
 
+### NEW in v0.2 - Export direct to ProPresenter6 .pro6 fileformat
+
+* Creates a directory of .pro6 song files
+* Creates ProPresenter slide groups from EasyWorship song sections
+* Adds hot keys to ProPresenter slide groups following [Luke McElroy's 2014 recommendation](https://www.worshiphousemedia.com/church-media-blog/software/simple-effective-propresenter-hot-key-system/)
+    * Currently hard-coded - will make overridable in a future update!
 
 ## To Do in Future
 (if there's a demand for it)
@@ -83,6 +93,11 @@ Note: this script does not write anything to the EasyWorship database files, how
     * For what it's worth, my CLI version of PHP 5.6 garbles the "Å" character but the web server version of the same PHP installation has no problems encoding this character.
     
 ## Version history
+
+### 0.2 (2018-03-02)
+
+* Numerous bug fixes from real-world use
+* Adds experimental ProPresenter6 export feature
 
 ### 0.1 (2016-09-03)
 
