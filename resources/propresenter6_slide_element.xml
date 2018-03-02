@@ -1,0 +1,14 @@
+<RVDisplaySlide UUID="%%GUID%%" backgroundColor="0 0 0 1" chordChartPath="" drawingBackgroundColor="true" enabled="true" highlightColor="0 0 0 0" hotKey="%%HOTKEY%%" label="" notes="" socialItemCount="1">
+    <array rvXMLIvarName="cues" />
+    <array rvXMLIvarName="displayElements">
+        <RVTextElement UUID="%%TEXTGUID%%" additionalLineFillHeight="0.000000" adjustsHeightToFit="false" bezelRadius="0.000000" displayDelay="0.000000" displayName="TextElement" drawLineBackground="false" drawingFill="false" drawingShadow="false" drawingStroke="false" fillColor="0 0 0 0" fromTemplate="true" lineFillVerticalOffset="0.000000" locked="false" opacity="1.000000" persistent="false" revealType="0" rotation="0.000000" source="" typeID="0" useAllCaps="false" verticalAlignment="1">
+            <RVRect3D rvXMLIvarName="position">{0 100 0 1920 864}</RVRect3D>
+            <shadow rvXMLIvarName="shadow">0.000000|0 0 0 0.3333333432674408|{4.0000002002606152, -3.9999995259110506}</shadow>
+            <dictionary rvXMLIvarName="stroke">
+                <NSColor rvXMLDictionaryKey="RVShapeElementStrokeColorKey">0 0 0 1</NSColor>
+                <NSNumber hint="float" rvXMLDictionaryKey="RVShapeElementStrokeWidthKey">1.000000</NSNumber>
+            </dictionary>
+            <NSString rvXMLIvarName="RTFData">%%TEXT%%</NSString>
+        </RVTextElement>
+    </array>
+</RVDisplaySlide>

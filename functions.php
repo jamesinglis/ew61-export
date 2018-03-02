@@ -19,6 +19,14 @@ mb_http_output('UTF-8');
 mb_http_input('UTF-8');
 mb_regex_encoding('UTF-8');
 
+define('EW6_EXPORT_EOL', "\r\n");
+
+// Output files in a timestamp labelled sub-directory
+if ($custom_settings['output_subdirectory']) {
+    $output_directory = __DIR__ . '/output/' . date('YmdHis') . '_' . $file_export_type . '/';
+    mkdir($output_directory, 0777, true);
+}
+
 
 /**
  * Formats the title of the song
@@ -54,6 +62,8 @@ function process_ew_title($title)
  */
 function process_ew_lyrics($text)
 {
+    global $custom_settings;
+
     // First pass - basic processing
     $text_lines = explode(PHP_EOL, $text);
     foreach ($text_lines as $line_number => &$text_line) {
@@ -63,16 +73,36 @@ function process_ew_lyrics($text)
     $text = implode(PHP_EOL, $text_lines);
 
     // Second loop - makes sure we catch any newlines that were previously marked as "\line" in the original storage
-    $text_lines = explode(PHP_EOL, $text);
+    $text_lines = explode(PHP_EOL, trim($text));
     foreach ($text_lines as $line_number => &$text_line) {
         $text_line = process_ew_lyrics_line_custom($text_line);
     }
     unset($text_line);
     $text = implode(PHP_EOL, $text_lines);
 
-    $text = preg_replace('/(\n{3,})/', str_repeat(PHP_EOL, 2), $text); // Any time there is a block of newlines > 2, condense it to just two
+    // Condense all slide breaks (removes all paragraph breaks - will add in relevant newlines later)
+    $line_breaks_to_condense = 3;
+    $condensed_line_breaks = 2;
+    if ($custom_settings['condense_slide_breaks']) {
+        $line_breaks_to_condense--;
+        $condensed_line_breaks--;
+    }
 
-    return trim($text); // Trim because that's what we do to keep our files clean, and also remove large quantities of newlines at start and end of the block
+    $text = preg_replace('/(\n{' . $line_breaks_to_condense . ',})/', str_repeat(PHP_EOL, $condensed_line_breaks), trim($text)); // Any time there is a block of newlines > 2, condense it to just two
+
+    // Third loop
+    $text_lines = explode(PHP_EOL, $text);
+    foreach ($text_lines as $line_number => &$text_line) {
+        $text_line = process_ew_lyrics_line_song_parts($text_line);
+    }
+    unset($text_line);
+    $text = implode(PHP_EOL, $text_lines);
+
+    $line_breaks_to_condense = 3;
+    $condensed_line_breaks = 2;
+    $text = preg_replace('/(\n{' . $line_breaks_to_condense . ',})/', str_repeat(PHP_EOL, $condensed_line_breaks), trim($text)); // Any time there is a block of newlines > 2, condense it to just two
+
+    return process_ew_blocks($text); // Trim because that's what we do to keep our files clean, and also remove large quantities of newlines at start and end of the block
 }
 
 /**
@@ -92,7 +122,8 @@ function process_ew_lyrics_line($text_line)
         $text_line = '';
     }
     $text_line = preg_replace("/\\\\par\s?\}?$/", '', $text_line); // Remove \par} from end of the line
-    $text_line = preg_replace("/\{\\\\\*\\\\(sdfsreal|sdfsdef) [\d\.]+\}/", '', $text_line); // Remove {\*\sdfsreal 72.9} and {\*\sdfsdef 72.9}
+//    $text_line = preg_replace("/\{\\\\\*\\\\(sdfsreal|sdfsdef) [\d\.]+\}/", '', $text_line); // Remove {\*\sdfsreal 72.9} and {\*\sdfsdef 72.9}
+    $text_line = preg_replace("/\{\\\\\*\\\\.+\}/", '', $text_line); // Remove {\*\sdfsreal 72.9} and {\*\sdfsdef 72.9}
     $text_line = preg_replace("/\\\\[^ ]+( |$)/", '', $text_line); // Remove '\sdslidemarker\qc\qdef\sdewparatemplatestyle101\plain\sdewtemplatestyle101\fs146\sdfsauto' strings
     $text_line = preg_replace("/\}$/", '', $text_line); // Remove any random trailing '}' characters
     $text_line = preg_replace("/\s+/", ' ', $text_line); // Condense any whitespaces (single or multiple) to a single space
@@ -110,15 +141,24 @@ function process_ew_lyrics_line($text_line)
 function process_ew_lyrics_line_custom($text_line)
 {
     global $custom_settings;
+    global $words_to_capitalize;
 
     // Capitalize some property names
     if ($custom_settings['capitalize_names']) {
-        $text_line = str_replace(['jesus', 'god', 'gud'], ['Jesus', 'God', 'Gud'], $text_line);
+        foreach ($words_to_capitalize as $word) {
+            $text_line = preg_replace('/( |^)(' . $word . ')( |$)/i', '$1' . $word . '$3', $text_line);
+        }
     }
 
     // Remove line-ending punctuation
     if ($custom_settings['remove_end_punctuation']) {
         $text_line = preg_replace('/[.,;]+ ?$/', '', $text_line);
+    }
+
+    // Fix mid-line punctuation issues
+    if ($custom_settings['fix_mid_line_punctuation']) {
+        $text_line = preg_replace('/\./', "\n", $text_line);
+        $text_line = preg_replace('/([,;\?!])([^ ])/', '$1 $2', $text_line);
     }
 
     // Straighten curly quotes
@@ -139,11 +179,6 @@ function process_ew_lyrics_line_custom($text_line)
 
     $text_line = trim($text_line); // We trim before the standardized song sections because we might actually want to keep some trailing newlines
 
-    // Standardize the names of the song sections to fit ProPresenter's defaults
-    if ($custom_settings['standardize_song_sections']) {
-        $text_line = process_ew_lyrics_line_song_parts($text_line);
-    }
-
     return $text_line;
 }
 
@@ -155,17 +190,29 @@ function process_ew_lyrics_line_custom($text_line)
  */
 function process_ew_lyrics_line_song_parts($text_line)
 {
+    global $custom_settings;
+    global $song_section_names;;
+
     $line_breaks = str_repeat(PHP_EOL, 2);
 
-    if (preg_match('/^(Verse|Chorus|Bridge) ?(\d+)$/i', $text_line, $matches)) {
-        $text_line = $line_breaks . $matches[1] . ' ' . $matches[2];
-    } elseif (preg_match('/^(Verse|Chorus|Bridge)$/i', $text_line, $matches)) {
-        $text_line = $line_breaks . $matches[1] . ' 1'; // When just a plain 'Chorus'
-    } elseif (preg_match('/^Pre\-?Chorus/i', $text_line, $matches)) {
-        $text_line = $line_breaks . 'Pre-Chorus';
-    } elseif (preg_match('/^(Tag|Intro) ?\d+?$/i', $text_line, $matches)) {
-        $text_line = $line_breaks . $matches[1];
+    // Standardize the names of the song sections to fit ProPresenter's defaults
+    if ($custom_settings['standardize_song_sections']) {
+        if (preg_match('/^(Verse|Chorus|Bridge)\s?(\d+)$/i', $text_line, $matches)) {
+            $text_line = ucwords(strtolower($matches[1])) . ' ' . $matches[2];
+        } elseif (preg_match('/^(Verse|Chorus|Bridge)$/i', $text_line, $matches)) {
+            $text_line = ucwords(strtolower($matches[1])) . ' 1'; // When just a plain 'Chorus'
+        } elseif (preg_match('/^Pre\-?Chorus/i', $text_line, $matches)) {
+            $text_line = 'Pre-Chorus';
+        } elseif (preg_match('/^(Tag|Intro) ?\d+?$/i', $text_line, $matches)) {
+            $text_line = ucwords(strtolower($matches[1]));
+        }
     }
+
+    // Add double line break before each song part
+    if (preg_match('/^(' . implode('|', $song_section_names) . ')/i', $text_line, $matches)) {
+        $text_line = $line_breaks . $text_line;
+    }
+
     return $text_line;
 }
 
@@ -208,12 +255,83 @@ function process_ew_lyrics_metadata(array $song)
     return $metadata;
 }
 
+function process_ew_blocks($text_lines)
+{
+    $text_blocks = explode(str_repeat(PHP_EOL, 2), trim($text_lines));
+    $text_blocks_array = array();
+    $text_blocks_output_array = array();
+
+    foreach ($text_blocks as &$text_block) {
+        $text_block_array = process_ew_single_block($text_block);
+        $text_blocks_array[] = $text_block_array;
+        $text_blocks_output_array[] = $text_block_array['output'];
+    }
+    unset($text_block);
+
+    return implode(str_repeat(PHP_EOL, 2), $text_blocks_output_array);
+}
+
+function process_ew_single_block($text_block)
+{
+    global $custom_settings;
+    global $song_section_names;
+    global $reflow_max_lines;
+
+    $text_lines = explode(PHP_EOL, $text_block);
+    $text_block_array['heading'] = false;
+
+    if (preg_match('/(' . implode('|', $song_section_names) . ') ?(\d+?)/', $text_lines[0], $matches)) {
+        $text_block_array['heading'] = array(
+            'label' => $matches[0],
+            'type' => $matches[1],
+            'number' => $matches[2],
+        );
+        unset($text_lines[0]);
+    }
+
+    $text_block_array['lines'] = array_values($text_lines);
+    $text_block_array['line_count'] = count($text_lines);
+
+    $group = 0;
+    $group_size = count($text_lines);
+    if ($custom_settings['reflow_large_blocks']) {
+        $group_size = $reflow_max_lines;
+    }
+
+    // If there isn't an even split with the $reflow_max_lines number of lines, see if one line less helps
+    if ($group_size > 2 && count($text_lines) % $group_size !== 0 && count($text_lines) % ($group_size - 1) === 0) {
+        $group_size = $group_size - 1;
+    }
+
+    // Loop through the
+    for ($i = 0; $i < count($text_lines); $i++) {
+        $text_block_array['groups'][$group][] = $text_block_array['lines'][$i];
+        if (($i + 1) % $group_size === 0) {
+            $group++;
+        }
+    }
+
+    $temp_group_array = array();
+
+    if (array_key_exists('groups', $text_block_array) && count($text_block_array) > 0) {
+        foreach ($text_block_array['groups'] as $group) {
+            $temp_group_array[] = implode(str_repeat(PHP_EOL, 1), $group);
+        }
+    }
+
+    // Build up the output by condensing arrays
+    $text_block_array['output'] = $text_block_array['heading'] !== false ? $text_block_array['heading']['label'] . PHP_EOL : '';
+    $text_block_array['output'] .= implode(str_repeat(PHP_EOL, 2), $temp_group_array);
+
+    return $text_block_array;
+}
+
 /**
  * Worker function that constructs the file contents and saves it to the output directory
  *
  * @param $song Song array
  */
-function save_text_file($song)
+function save_text_file($song, $file_export_type)
 {
     global $output_directory;
     global $custom_settings;
@@ -223,6 +341,9 @@ function save_text_file($song)
     $filename = preg_replace('/\s+/', ' ', trim($filename)); // Make sure we don't have any crazy spaces in the file name
     $filename = process_unicode($filename);
     $file_extension = ".txt";
+    if ($file_export_type === "propresenter6") {
+        $file_extension = '.pro6';
+    }
 
     // Prevent overwriting files - adds a '(1)' style suffix
     if ($custom_settings['prevent_overwrites']) {
@@ -237,20 +358,238 @@ function save_text_file($song)
     // Set up the file contents
     $contents = '';
 
-    // Add the meta data to the top of the file if requested
-    if ($custom_settings['add_metadata_to_export_files']) {
-        $contents .= process_ew_lyrics_metadata($song);
+    if ($file_export_type === "propresenter6") {
+        $contents .= $song['text'];
+        $break_char = php_sapi_name() === "cli" ? PHP_EOL : "<br/>";
+        echo sprintf('Converting "%s" to ProPresenter6 (filename "%s%s", id: %d)...', $song['title'], $filename, $file_extension, $song['id']) . $break_char;
+    } else {
+        // Add the meta data to the top of the file if requested
+        if ($custom_settings['add_metadata_to_export_files']) {
+            $contents .= process_ew_lyrics_metadata($song);
+        }
+
+        $contents .= $song['text'];
+
+        // Desperate attempt to get rid of any lingering unicode formatting issues!
+        $contents = iconv("ISO-8859-1", "UTF-8", iconv("UTF-8", "ISO-8859-1//IGNORE", $contents));
+
+        $break_char = php_sapi_name() === "cli" ? PHP_EOL : "<br/>";
+        echo sprintf('Converting "%s" to plain text (filename "%s%s", id: %d)...', $song['title'], $filename, $file_extension, $song['id']) . $break_char;
     }
 
-    $contents .= $song['text'];
+    file_put_contents($output_directory . $filename . $file_extension, "\xEF\xBB\xBF" . str_replace(PHP_EOL, EW6_EXPORT_EOL, $contents));
+}
 
-    // Desperate attempt to get rid of any lingering unicode formatting issues!
-    $contents = iconv("ISO-8859-1", "UTF-8", iconv("UTF-8", "ISO-8859-1//IGNORE", $contents));
+function generateRandomHex($number = 1)
+{
+    return strtoupper(substr(bin2hex(openssl_random_pseudo_bytes($number)), 0, $number));
+}
 
-    $break_char = php_sapi_name() === "cli" ? PHP_EOL : "<br/>";
-    echo sprintf('Converting "%s" to plain text (filename "%s%s", id: %d)...', $song['title'], $filename, $file_extension, $song['id']) . $break_char;
+function convert_non_ascii_chars_to_hex($text)
+{
+    $text = utf8_decode(mb_convert_encoding($text, "UTF-8"));
+    $characters = utf8_decode(mb_convert_encoding("æøåÆØÅ", "UTF-8"));
+    foreach (str_split($characters) as $char) {
+        $converted_char = '\\\'' . bin2hex($char);
+        $text = str_replace($char, $converted_char, $text);
+    }
+    return $text;
+}
 
-    file_put_contents($output_directory . $filename . $file_extension, "\xEF\xBB\xBF" . $contents);
+function generate_propresenter_guid()
+{
+    // UUID Format: 94A8AD6C-2A51-44ED-9CAF-79DE1B722190
+    return sprintf('%s-%s-%s-%s', generateRandomHex(8), generateRandomHex(4), generateRandomHex(4), generateRandomHex(12));
+}
+
+function get_propresenter_section_color($section_name)
+{
+    $color_map = array(
+        'Intro' => '0 0 0 1',
+        'Verse 1' => '0 0 1 1',
+        'Verse 2' => '0 0.501960814 1 1',
+        'Verse 3' => '0 1 1 1',
+        'Verse 4' => '0 1 0.501960814 1',
+        'Verse 5' => '0 1 0 1',
+        'Verse 6' => '0.501960814 1 0 1',
+        'Pre-Chorus' => '1 0.400000006 0.400000006 1',
+        'Chorus 1' => '1 0 0 1',
+        'Chorus 2' => '0.501960814 0 0 1',
+        'Chorus 3' => '0.501960814 0 0.250980407 1',
+        'Bridge 1' => '0.501960814 0 1 1',
+        'Bridge 2' => '0.8000000119 0.400000006 1 1',
+        'Tag' => '0 0 0 1',
+        'End' => '0 0 0 1',
+    );
+
+    if (array_key_exists($section_name, $color_map)) {
+        return $color_map[$section_name];
+    }
+    return '';
+}
+
+function get_propresenter_section_hotkey($section_name)
+{
+    $hotkey_map = array(
+        'Intro' => 'I',
+        'Verse 1' => 'A',
+        'Verse 2' => 'S',
+        'Verse 3' => 'D',
+        'Verse 4' => 'F',
+        'Verse 5' => 'G',
+        'Verse 6' => 'H',
+        'Pre-Chorus' => 'X',
+        'Chorus 1' => 'C',
+        'Chorus 2' => 'V',
+        'Chorus 3' => '',
+        'Bridge 1' => 'B',
+        'Bridge 2' => 'M',
+        'Tag' => 'N',
+        'End' => 'Z',
+    );
+
+    if (array_key_exists($section_name, $hotkey_map)) {
+        return strtolower($hotkey_map[$section_name]);
+    }
+    return '';
+}
+
+/**
+ * Worker function that constructs the file contents and saves it to the output directory
+ *
+ * @param $song Song array
+ */
+function generate_prop6_file_contents($song)
+{
+    global $custom_settings;
+    $prop6_file_template = file_get_contents(dirname(__FILE__) . '/resources/propresenter6_file_wrapper.xml');
+    $prop6_group_template = file_get_contents(dirname(__FILE__) . '/resources/propresenter6_group_element.xml');
+    $prop6_slide_template = file_get_contents(dirname(__FILE__) . '/resources/propresenter6_slide_element.xml');
+    $prop6_slide_text = file_get_contents(dirname(__FILE__) . '/resources/propresenter6_slide_text.txt');
+
+    $slide_elements = array();
+
+    if ($custom_settings['prop6_add_blank_intro'] == true) {
+        $slide_elements['Intro'] = array(
+            'name' => 'Intro',
+            'guid' => generate_propresenter_guid(),
+            'color' => get_propresenter_section_color('Intro'),
+            'hotkey' => get_propresenter_section_hotkey('Intro'),
+            'slides' => array(
+                array(
+                    'guid' => generate_propresenter_guid(),
+                    'text' => ''
+                )
+            )
+        );
+    }
+
+    $section_counter = 1;
+    $current_group_name = 'Verse ' . $section_counter;
+    $slide_break = false;
+    $has_groups = false;
+    if (preg_match('/(Verse|Chorus|Bridge)/i', $song['text'], $matches)) {
+        $has_groups = true;
+    }
+
+    $text_lines = explode(PHP_EOL, $song['text']);
+
+    // Loop through the lines
+    foreach ($text_lines as $text_line) {
+
+        if ($has_groups === false && empty($text_line)) {
+            $section_counter++;
+            $current_group_name = 'Verse ' . $section_counter;
+            $slide_break = true;
+            continue;
+        } elseif ($has_groups === true && empty($text_line)) {
+            $slide_break = true;
+            continue;
+        }
+
+        // Create a new group whenever a heading is found
+        if (preg_match('/^(Verse|Chorus|Bridge)\s?(\d+)$/i', $text_line, $matches)) {
+            $current_group_name = ucwords(strtolower($matches[1])) . ' ' . $matches[2];
+        } elseif (preg_match('/^(Verse|Chorus|Bridge)$/i', $text_line, $matches)) {
+            $current_group_name = ucwords(strtolower($matches[1])) . ' 1'; // When just a plain 'Chorus'
+        } elseif (preg_match('/^Pre\-?Chorus/i', $text_line, $matches)) {
+            $current_group_name = 'Pre-Chorus';
+        } elseif (preg_match('/^(Tag|Intro) ?\d?$/i', $text_line, $matches)) {
+            $current_group_name = ucwords(strtolower($matches[1]));
+        }
+
+        if (array_key_exists($current_group_name, $slide_elements) === false) {
+            $slide_elements[$current_group_name] = array(
+                'name' => $current_group_name,
+                'guid' => generate_propresenter_guid(),
+                'color' => get_propresenter_section_color($current_group_name),
+                'hotkey' => get_propresenter_section_hotkey($current_group_name),
+                'slides' => array()
+            );
+            continue;
+        }
+
+        // Create a slide for every chunk of lines
+        if ($slide_break || count($slide_elements[$current_group_name]['slides']) === 0) {
+            $slide_elements[$current_group_name]['slides'][] = array(
+                'guid' => generate_propresenter_guid(),
+                'text' => $text_line
+            );
+        } else {
+            $slide_index = count($slide_elements[$current_group_name]['slides']) - 1;
+            $slide_elements[$current_group_name]['slides'][$slide_index]['text'] .= PHP_EOL . $text_line;
+        }
+
+        $slide_break = false;
+    }
+
+    if ($custom_settings['prop6_add_blank_end'] == true) {
+        $slide_elements['End'] = array(
+            'name' => 'End',
+            'guid' => generate_propresenter_guid(),
+            'color' => get_propresenter_section_color('End'),
+            'hotkey' => get_propresenter_section_hotkey('End'),
+            'slides' => array(
+                array(
+                    'guid' => generate_propresenter_guid(),
+                    'text' => ''
+                )
+            )
+        );
+    }
+
+    $groups_xml = '';
+    foreach ($slide_elements as $group) {
+        $slides_xml = '';
+        foreach ($group['slides'] as $index => $slide) {
+            $slide_build = $prop6_slide_template;
+            if ($index === 0 && $custom_settings['prop6_add_hotkeys'] == true) {
+                $slide_build = str_replace('%%HOTKEY%%', $group['hotkey'], $slide_build);
+            } else {
+                $slide_build = str_replace('%%HOTKEY%%', '', $slide_build);
+            }
+            $slide_build = str_replace('%%GUID%%', $slide['guid'], $slide_build);
+            $slide_build = str_replace('%%TEXTGUID%%', generate_propresenter_guid(), $slide_build);
+            $slide_text = str_replace(PHP_EOL, '\\' . PHP_EOL, $slide['text']);
+            $slide_text = convert_non_ascii_chars_to_hex($slide_text);
+            $slide_text = str_replace('%%TEXT%%', $slide_text, $prop6_slide_text);
+            $slide_build = str_replace('%%TEXT%%', base64_encode($slide_text), $slide_build);
+            $slides_xml .= $slide_build;
+        }
+
+        $group_build = $prop6_group_template;
+        $group_build = str_replace('%%NAME%%', $group['name'], $group_build);
+        $group_build = str_replace('%%COLOR%%', $group['color'], $group_build);
+        $group_build = str_replace('%%GUID%%', $group['guid'], $group_build);
+        $group_build = str_replace('%%SLIDES%%', $slides_xml, $group_build);
+        $groups_xml .= $group_build;
+    }
+
+    $prop6_file_template = str_replace('%%TITLE%%', $song['title'], $prop6_file_template);
+    $prop6_file_template = str_replace('%%GUID%%', generate_propresenter_guid(), $prop6_file_template);
+    $prop6_file_template = str_replace('%%GROUPS%%', $groups_xml, $prop6_file_template);
+
+    return $prop6_file_template;
 }
 
 /**

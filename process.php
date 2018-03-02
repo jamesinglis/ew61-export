@@ -31,8 +31,12 @@ $counter = 0;
 foreach ($songs as $id => $song) {
     $query2 = "SELECT words FROM word WHERE song_id = $id";
     foreach ($dbh_lyrics->query($query2) as $lyrics) {
-        $songs[$id]['text'] = process_ew_lyrics($lyrics['words']);
-        save_text_file($songs[$id]);
+        if ($file_export_type === 'propresenter6') {
+            $songs[$id]['text'] = generate_prop6_file_contents($songs[$id]);
+        } else {
+            $songs[$id]['text'] = process_ew_lyrics($lyrics['words']);
+        }
+        save_text_file($songs[$id], $file_export_type);
     }
     if ($test_mode && $counter > 8) {
         break;

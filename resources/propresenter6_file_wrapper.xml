@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RVPresentationDocument CCLIArtistCredits="" CCLIAuthor="" CCLICopyrightYear="" CCLIDisplay="false" CCLIPublisher="" CCLISongNumber="" CCLISongTitle="%%TITLE%%" backgroundColor="0 0 0 0" buildNumber="16050" category="Song" chordChartPath="" docType="0" drawingBackgroundColor="false" height="1080" lastDateUsed="" notes="" os="2" resourcesDirectory="" selectedArrangementID="" usedCount="0" uuid="%%GUID%%" versionNumber="600" width="1920">
+    <RVTimeline duration="0.000000" loop="false" rvXMLIvarName="timeline" selectedMediaTrackIndex="0" timeOffset="0.000000">
+        <array rvXMLIvarName="timeCues" />
+        <array rvXMLIvarName="mediaTracks" />
+    </RVTimeline>
+    <array rvXMLIvarName="groups">
+        %%GROUPS%%
+    </array>
+    <array rvXMLIvarName="arrangements" />
+</RVPresentationDocument>

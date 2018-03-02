@@ -1,0 +1,5 @@
+<RVSlideGrouping color="%%COLOR%%" name="%%NAME%%" uuid="%%GUID%%">
+    <array rvXMLIvarName="slides">
+        %%SLIDES%%
+    </array>
+</RVSlideGrouping>
