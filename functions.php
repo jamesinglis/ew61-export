@@ -370,8 +370,10 @@ function save_text_file($song, $file_export_type)
 
         $contents .= $song['text'];
 
-        // Desperate attempt to get rid of any lingering unicode formatting issues!
-        $contents = iconv("ISO-8859-1", "UTF-8", iconv("UTF-8", "ISO-8859-1//IGNORE", $contents));
+        if ($custom_settings['aggressive_text_encoding']) {
+            // Desperate attempt to get rid of any lingering unicode formatting issues! Forces text to ISO-8859-1 character set
+            $contents = iconv("ISO-8859-1", "UTF-8", iconv("UTF-8", "ISO-8859-1//IGNORE", $contents));
+        }
 
         $break_char = php_sapi_name() === "cli" ? PHP_EOL : "<br/>";
         echo sprintf('Converting "%s" to plain text (filename "%s%s", id: %d)...', $song['title'], $filename, $file_extension, $song['id']) . $break_char;
