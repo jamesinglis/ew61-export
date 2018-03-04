@@ -18,6 +18,10 @@ $dbh = new PDO('sqlite:' . $song_db_path) or die("cannot open the database");
 $dbh_lyrics = new PDO('sqlite:' . $song_words_db_path) or die("cannot open the database");
 $query = "SELECT * FROM song";
 
+if ($test_single_song_id && is_numeric($test_single_song_id)) {
+    $query .= " WHERE rowid = " . $test_single_song_id;
+}
+
 $songs = [];
 foreach ($dbh->query($query) as $song) {
     $songs[$song['rowid']] = [
