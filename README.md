@@ -66,6 +66,9 @@ Note: this script does not write anything to the EasyWorship database files, how
     * 'standardize_title_format' - Standardize the formatting of the name of the songs
     * 'prevent_overwrites' - Prevent overwriting files - adds a '(1)' style suffix
     * 'add_metadata_to_export_files' - Adds the metadata block to the top of the export files
+* ProPresenter-specific settings
+    * Add a blank Intro/End slide to each song (useful for cues and arrangements)
+    * Assign hot keys to slide groups
 
 ### NEW in v0.2 - Export direct to ProPresenter6 .pro6 fileformat
 
@@ -73,6 +76,11 @@ Note: this script does not write anything to the EasyWorship database files, how
 * Creates ProPresenter slide groups from EasyWorship song sections
 * Adds hot keys to ProPresenter slide groups following [Luke McElroy's 2014 recommendation](https://www.worshiphousemedia.com/church-media-blog/software/simple-effective-propresenter-hot-key-system/)
     * Currently hard-coded - will make overridable in a future update!
+    
+### NEW in v0.3 - Better text export
+
+* I didn't realize until now that the data is stored in EasyWorship in standard RTF format! My manual functions to strip this formatting didn't work for everyone. Implementing a more robust 
+* ProPresenter hoy keys are now managed in the config file - easier to override!
 
 ## To Do in Future
 (if there's a demand for it)
@@ -91,8 +99,15 @@ Note: this script does not write anything to the EasyWorship database files, how
 * Why am I getting strange characters in my export files?
     * It's most likely a text-encoding issue. This script was developed for a non-English EasyWorship library so unicode characters should be handled correctly, however I can't make any promises!
     * For what it's worth, my CLI version of PHP 5.6 garbles the "Å" character but the web server version of the same PHP installation has no problems encoding this character.
+* Why am I getting random references to fonts at the top of my song exports?
+    * This is a remnant of the RTF formatting - I'm manually stripping out references to Arial and Tahoma, but if you used a different font in EasyWorship, that font name may show up. If this happens, add the name of your font to the regex on line 130 of functions.php. 
     
 ## Version history
+
+### 0.3 (2018-04-11)
+
+* Adds real RTF processing to the song data from EasyWorship!
+* Move ProPresenter hot keys to config file. 
 
 ### 0.2 (2018-03-02)
 
