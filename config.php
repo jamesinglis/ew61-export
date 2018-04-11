@@ -33,3 +33,25 @@ $file_export_type = 'plain_text'; // set to 'propresenter6' to use the experimen
 
 $song_section_names = array('Verse', 'Chorus', 'Pre-Chorus', 'Bridge', 'Tag', 'Intro');
 $words_to_capitalize = array('Jesus', 'God', 'Gud', 'Lord', 'You', 'Your', 'Du', 'Din', 'Ditt', 'Han', 'Hans', 'Ham', 'Holy Spirit', 'Father');
+
+// This array controls which hot keys are assigned to which sections in ProPresenter exports
+$propresenter_hotkey_map = array(
+    'Intro' => 'I',
+    'Verse 1' => 'A',
+    'Verse 2' => 'S',
+    'Verse 3' => 'D',
+    'Verse 4' => 'F',
+    'Verse 5' => 'G',
+    'Verse 6' => 'H',
+    'Verse 7' => 'J',
+    'Verse 8' => 'K',
+    'Verse 9' => 'L',
+    'Pre-Chorus' => 'X',
+    'Chorus 1' => 'C',
+    'Chorus 2' => 'V',
+    'Chorus 3' => '',
+    'Bridge 1' => 'B',
+    'Bridge 2' => 'M',
+    'Tag' => 'N',
+    'End' => 'Z',
+);

@@ -432,26 +432,10 @@ function get_propresenter_section_color($section_name)
 
 function get_propresenter_section_hotkey($section_name)
 {
-    $hotkey_map = array(
-        'Intro' => 'I',
-        'Verse 1' => 'A',
-        'Verse 2' => 'S',
-        'Verse 3' => 'D',
-        'Verse 4' => 'F',
-        'Verse 5' => 'G',
-        'Verse 6' => 'H',
-        'Pre-Chorus' => 'X',
-        'Chorus 1' => 'C',
-        'Chorus 2' => 'V',
-        'Chorus 3' => '',
-        'Bridge 1' => 'B',
-        'Bridge 2' => 'M',
-        'Tag' => 'N',
-        'End' => 'Z',
-    );
+    global $propresenter_hotkey_map;
 
-    if (array_key_exists($section_name, $hotkey_map)) {
-        return strtolower($hotkey_map[$section_name]);
+    if (array_key_exists($section_name, $propresenter_hotkey_map)) {
+        return strtolower($propresenter_hotkey_map[$section_name]);
     }
     return '';
 }
