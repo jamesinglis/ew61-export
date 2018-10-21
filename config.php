@@ -9,7 +9,7 @@ $output_directory = __DIR__ . '/output/';
 
 // Custom Settings
 $custom_settings = array(
-    'capitalize_names' => false, // Capitalize some property names
+    'capitalize_names' => false, // Capitalize some property names, defined in $words_to_capitalize
     'remove_end_punctuation' => false, // Remove line-ending punctuation
     'fix_mid_line_punctuation' => false, // Fix mid-line punctuation
     'straighten_curly_quotes' => false, // Straighten curly quotes
@@ -20,7 +20,7 @@ $custom_settings = array(
     'prevent_overwrites' => true, // Prevent overwriting files - adds a '(1)' style suffix
     'add_metadata_to_export_files' => true, // Adds the metadata block to the top of the export files
     'condense_slide_breaks' => false, // Condense all slide breaks
-    'reflow_large_blocks' => false, // Reflow large blocks
+    'reflow_large_blocks' => false, // Reflow large blocks (target line length defined in $reflow_max_lines)
     'output_subdirectory' => true, // Output files in a timestamp labelled sub-directory
     'aggressive_text_encoding' => false, // Aggressively convert songs to ISO-8859-1 character set - this will most likely break songs with non-Latin characters!
     'prop6_add_blank_intro' => false, // Adds a blank "Intro" slide to ProPresenter files
@@ -31,11 +31,12 @@ $custom_settings = array(
 $reflow_max_lines = 2; // How many lines should we try to 'reflow' the text to?
 $file_export_type = 'plain_text'; // set to 'propresenter6' to use the experimental ProPresenter6 output
 
-$song_section_names = array('Verse', 'Chorus', 'Pre-Chorus', 'Bridge', 'Tag', 'Intro');
+$song_section_names = array('Verse', 'Chorus', 'Pre-Chorus', 'Bridge', 'Tag', 'Intro', 'End');
 $words_to_capitalize = array('Jesus', 'God', 'Gud', 'Lord', 'You', 'Your', 'Du', 'Din', 'Ditt', 'Han', 'Hans', 'Ham', 'Holy Spirit', 'Father');
 
 // This array controls which hot keys are assigned to which sections in ProPresenter exports
 $propresenter_hotkey_map = array(
+    'Title' => 'T',
     'Intro' => 'I',
     'Verse 1' => 'A',
     'Verse 2' => 'S',

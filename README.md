@@ -52,11 +52,12 @@ Note: this script does not write anything to the EasyWorship database files, how
 ## Features
 
 * Exports all songs and lyrics from EasyWorship 6.1 database files into a date-labeled sub-directory in /output directory
-* Attempts to strip all formatting from song words to make for a clean import
+* Attempts to strip all formatting from song words to make for a clean import into target system
+* Outputs to text files by default with experimental ProPresenter6 export (specify $file_export_type in config.php)
 * Attempts to handle inconsistencies with text encoding
 * Reflow song sections over 2 lines long (can be changed in config file)
 * Custom formatting functions (needs to be enabled in config file)
-    * 'capitalize_names' - Capitalize some property names
+    * 'capitalize_names' - Capitalize some property names (defined in $words_to_capitalize variable)
     * 'remove_end_punctuation' - Remove line-ending punctuation
     * 'fix_mid_line_punctuation' - Fixes mid-line punctuation - replaces '.' with a line break, and makes sure ',;\?!' is always followed by a space
     * 'straighten_curly_quotes' - Straighten curly quotes
@@ -66,21 +67,25 @@ Note: this script does not write anything to the EasyWorship database files, how
     * 'standardize_title_format' - Standardize the formatting of the name of the songs
     * 'prevent_overwrites' - Prevent overwriting files - adds a '(1)' style suffix
     * 'add_metadata_to_export_files' - Adds the metadata block to the top of the export files
+    * 'condense_slide_breaks' - Condense all slide breaks
+    * 'reflow_large_blocks' - Reflow large blocks (target line length defined in $reflow_max_lines)
+    * 'output_subdirectory' - Output files in a timestamp labelled sub-directory
+    * 'aggressive_text_encoding' - Aggressively convert songs to ISO-8859-1 character set - this will most likely break songs with non-Latin characters!
 * ProPresenter-specific settings
-    * Add a blank Intro/End slide to each song (useful for cues and arrangements)
-    * Assign hot keys to slide groups
+    * 'prop6_add_blank_intro' - Adds a blank "Intro" slide to ProPresenter files (useful for adding cues and arrangements)
+	* 'prop6_add_blank_end' - Adds a blank "End" slide to ProPresenter files (useful for adding cues and arrangements)
+    * 'prop6_add_hotkeys' - Assign hot keys to slide groups
 
 ### NEW in v0.2 - Export direct to ProPresenter6 .pro6 fileformat
 
 * Creates a directory of .pro6 song files
 * Creates ProPresenter slide groups from EasyWorship song sections
 * Adds hot keys to ProPresenter slide groups following [Luke McElroy's 2014 recommendation](https://www.worshiphousemedia.com/church-media-blog/software/simple-effective-propresenter-hot-key-system/)
-    * Currently hard-coded - will make overridable in a future update!
     
 ### NEW in v0.3 - Better text export
 
-* I didn't realize until now that the data is stored in EasyWorship in standard RTF format! My manual functions to strip this formatting didn't work for everyone. Implementing a more robust 
-* ProPresenter hoy keys are now managed in the config file - easier to override!
+* I didn't realize until now that the data is stored in EasyWorship in standard RTF format! My manual functions to strip this formatting didn't work for everyone. Implementing a more robust RTF to text formatting solution.
+* ProPresenter hot keys are now managed in the config file - easier to override!
 
 ## To Do in Future
 (if there's a demand for it)
@@ -103,6 +108,10 @@ Note: this script does not write anything to the EasyWorship database files, how
     * This is a remnant of the RTF formatting - I'm manually stripping out references to Arial and Tahoma, but if you used a different font in EasyWorship, that font name may show up. If this happens, add the name of your font to the regex on line 130 of functions.php. 
     
 ## Version history
+
+### 0.3.1 (2018-10-21)
+* Adds missing ProPresenter slide text template
+* Update config and readme documentation
 
 ### 0.3 (2018-04-11)
 
