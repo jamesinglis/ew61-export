@@ -1,0 +1,8 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf830
+{\fonttbl\f0\fswiss\fcharset0 ArialMT;}
+{\colortbl;\red255\green255\blue255;\red255\green255\blue255;\red51\green51\blue51;}
+{\*\expandedcolortbl;;\csgray\c100000;\csgenericrgb\c20000\c20000\c20000;}
+\pard\slleading320\pardirnatural\qc\partightenfactor0
+
+\f0\b\fs127\fsmilli63999 \cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth-80 \strokec3 %%TEXT%%}
