@@ -1,2 +1,7 @@
+*.dat
 *.db
-*.txt
+*.zip
+databases/*/
+output/*/*.txt
+output/*/*.pro6
+test/
