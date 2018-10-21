@@ -30,7 +30,7 @@ For further information about these, the following links may be useful:
 
 To use this solution, you'll need to be comfortable with running PHP scripts. It doesn't have a graphical user interface, however you can run this from the command line or from a web browser.
 
-* Ensure that PHP has PDO SQLite support/
+* Ensure that PHP has PDO SQLite support and MBString support (see https://github.com/jamesinglis/ew61-export/issues/1 for details - thanks jonathantjm!)
 * Clone this repository to a location on your computer that PHP has write access to.
 * Locate the EasyWorship database files in the EasyWorship data directory
     * This is commonly in C:\Users\Public\Softouch\EasyWorship\Default\Databases\Data\ but may vary
