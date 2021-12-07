@@ -130,6 +130,11 @@ Note: this script does not write anything to the EasyWorship database files, how
     
 ## Version history
 
+### 0.3.2 (2021-12-07)
+* Tweak for PHP8 compatibility
+* Adds reference to PHP library dependencies answered in jonathantjm's issue
+* Update config and readme documentation
+
 ### 0.3.1 (2018-10-21)
 * Adds missing ProPresenter slide text template
 * Update config and readme documentation
