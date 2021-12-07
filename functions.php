@@ -16,7 +16,7 @@ mb_detect_order(array('UTF-8', 'ISO-8859-1', 'ASCII'));
 ini_set('default_charset', 'utf-8');
 mb_internal_encoding('UTF-8');
 mb_http_output('UTF-8');
-mb_http_input('UTF-8');
+mb_http_input('S');
 mb_regex_encoding('UTF-8');
 
 define('EW6_EXPORT_EOL', "\r\n");
