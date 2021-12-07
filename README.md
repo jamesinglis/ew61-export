@@ -81,6 +81,25 @@ Note: this script does not write anything to the EasyWorship database files, how
 * Creates a directory of .pro6 song files
 * Creates ProPresenter slide groups from EasyWorship song sections
 * Adds hot keys to ProPresenter slide groups following [Luke McElroy's 2014 recommendation](https://www.worshiphousemedia.com/church-media-blog/software/simple-effective-propresenter-hot-key-system/)
+    * Title - T
+    * Intro - I
+    * Verse 1 - A
+    * Verse 2 - S
+    * Verse 3 - D
+    * Verse 4 - F
+    * Verse 5 - G
+    * Verse 6 - H
+    * Verse 7 - J
+    * Verse 8 - K
+    * Verse 9 - L
+    * Pre-Chorus - X
+    * Chorus 1 - C
+    * Chorus 2 - V
+    * Chorus 3 - 
+    * Bridge 1 - B
+    * Bridge 2 - M
+    * Tag - N
+    * End - Z
     
 ### NEW in v0.3 - Better text export
 
@@ -101,6 +120,8 @@ Note: this script does not write anything to the EasyWorship database files, how
 
 * Why is this written in PHP? Surely [insert language/framework here] would be a better choice!
     * You may be right, however this script was developed to meet an immediate need for myself and PHP is the language in which I am most proficient!
+* What version of PHP do I need to run this?
+    * The solution was written for PHP 5.6. I have run conversions with it in December 2021 with PHP 8.0.12 (with minor change made in v0.3.2). 
 * Why am I getting strange characters in my export files?
     * It's most likely a text-encoding issue. This script was developed for a non-English EasyWorship library so unicode characters should be handled correctly, however I can't make any promises!
     * For what it's worth, my CLI version of PHP 5.6 garbles the "Å" character but the web server version of the same PHP installation has no problems encoding this character.
