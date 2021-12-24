@@ -512,7 +512,9 @@ function generate_prop6_file_contents($song)
                 'hotkey' => get_propresenter_section_hotkey($current_group_name),
                 'slides' => array()
             );
-            continue;
+            if ($has_groups === true) {
+                continue;
+            }
         }
 
         // Create a slide for every chunk of lines
